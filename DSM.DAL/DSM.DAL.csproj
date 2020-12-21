@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="bin\Debug\netstandard2.0\DSM.DAL.deps.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\netstandard2.0\DSM.DAL.dll" />
+    <None Include="bin\Debug\netstandard2.0\DSM.DAL.pdb" />
+    <None Include="bin\Debug\netstandard2.0\DSM.DBModels.dll" />
+    <None Include="bin\Debug\netstandard2.0\DSM.DBModels.pdb" />
+    <None Include="bin\Debug\netstandard2.0\DSM.EntityModels.dll" />
+    <None Include="bin\Debug\netstandard2.0\DSM.EntityModels.pdb" />
+    <None Include="bin\Debug\netstandard2.0\DSM.Interface.dll" />
+    <None Include="bin\Debug\netstandard2.0\DSM.Interface.pdb" />
+    <None Include="bin\Debug\netstandard2.0\log4net.config" />
+    <None Include="bin\log4net.config" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="log4net" Version="2.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Formatters.Xml" Version="2.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.2.6">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="2.2.10" />
+    <PackageReference Include="NETCore-log4net" Version="2.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DSM.DBModels\DSM.DBModels.csproj" />
+    <ProjectReference Include="..\DSM.EntityModels\DSM.EntityModels.csproj" />
+    <ProjectReference Include="..\DSM.Interface\DSM.Interface.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resource\ResourceResponse.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ResourceResponse.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resource\ResourceResponse.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>ResourceResponse.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>
