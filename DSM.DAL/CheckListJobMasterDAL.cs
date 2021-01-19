@@ -443,6 +443,10 @@ namespace DSM.DAL
                         item.CheckListStartTime = st;
                         item.CheckListEndTime = et;
 
+
+
+                        //check grade is there or not 
+
                         string[] SplitpreviousGradeButton = data.previousGrade.Split('-');
                         var pregrade = db.GradeMaster.Where(m => m.IsDeleted == false && m.GradeName == SplitpreviousGradeButton[0] ).FirstOrDefault();
 
@@ -499,11 +503,7 @@ namespace DSM.DAL
 
                           string[] SplitcurrentGradeButton = data.currentGrade.Split('-');
 
-                            //List<string> listcurrentGradeIds = new List<string>();
-                            //listcurrentGradeIds = SplitcurrentGradeButton.ToList();
-
-                            //var pregrade = db.GradeMaster.Where(m => m.GradeName == listcurrentGradeIds[0] || m.GradeCode == listcurrentGradeIds[1]).FirstOrDefault();
-
+                           
                             var curGrade = db.GradeMaster.Where(m =>m.IsDeleted == false && m.GradeName == SplitcurrentGradeButton[0]).FirstOrDefault();
 
                             if (curGrade == null)
@@ -541,12 +541,89 @@ namespace DSM.DAL
 
                             }
 
+
+
+
+
+                        //  item.PreviousColor = data.previousColor;
+                        // item.CurrentColor = data.currentColor;
+
+
+                        // check colour is there or not
+
+                        string[] SplitpreviouscolourButton = data.previousColor.Split('-');
+                        var precolr = db.ColorMaster.Where(m => m.IsDeleted == false && m.ColorName == SplitpreviouscolourButton[0]).FirstOrDefault();
+
+                        //  var pregrade = db.GradeMaster.Where(m => m.GradeName == SplitpreviousGradeButton[0] || m.GradeCode == SplitpreviousGradeButton[1]).FirstOrDefault();
+
+
+
+                        if (precolr == null)
+                        {
+
+                            ColorMaster item2 = new ColorMaster();
+                          
+                            item2.ColorName = SplitpreviouscolourButton[0];
+                            item2.ColorCode = SplitpreviouscolourButton[1];
+                            item2.ColorDescription = SplitpreviouscolourButton[0];
+                                
+                            item2.IsActive = true;
+                            item2.IsDeleted = false;
+                            item2.CreatedBy = userId;
+                            item2.CreatedOn = DateTime.Now;
+                            db.ColorMaster.Add(item2);
+                            db.SaveChanges();
+                            
+                            item.PreviousColor = item2.ColorId;
+                        }
+                        else
+                        {
+                            precolr.ColorName = SplitpreviouscolourButton[0];
+                            precolr.ColorDescription = SplitpreviouscolourButton[0];
+                            precolr.ModifiedBy = userId;
+                            precolr.ModifiedOn = DateTime.Now;
+                            db.SaveChanges();
+                            
+
+                            item.PreviousColor = precolr.ColorId;
+
+                        }
+
+                        string[] SplitcurrentclourButton = data.currentColor.Split('-');
+
                        
+                        var curclrs = db.ColorMaster.Where(m => m.IsDeleted == false && m.ColorName == SplitcurrentclourButton[0]).FirstOrDefault();
 
+                        if (curclrs == null)
+                        {
 
+                            ColorMaster item12 = new ColorMaster();
+                            item12.ColorName = SplitcurrentclourButton[0];
+                            item12.ColorCode = SplitcurrentclourButton[1];
+                            item12.ColorDescription = SplitcurrentclourButton[0];
+                            item12.IsActive = true;
+                            item12.IsDeleted = false;
+                            item12.CreatedBy = userId;
+                            item12.CreatedOn = DateTime.Now;
+                            db.ColorMaster.Add(item12);
+                            db.SaveChanges();
+                          
+                            item.CurrentColor = item12.ColorId;
 
-                        item.PreviousColor = data.previousColor;
-                        item.CurrentColor = data.currentColor;
+                        }
+                        else
+                        {
+                            curclrs.ColorName = SplitcurrentGradeButton[0];
+                            
+                            curclrs.ColorDescription = SplitcurrentGradeButton[0];
+                            curclrs.ModifiedBy = userId;
+                            curclrs.ModifiedOn = DateTime.Now;
+                            db.SaveChanges();
+
+                            item.CurrentColor = curclrs.ColorId;
+
+                        }
+
                         item.CheckListGroup = groupName;
                         item.BatchNumber = data.batchNumber;
                         item.ProcessOrderNumber = data.processOrderNumber;
@@ -1397,8 +1474,16 @@ namespace DSM.DAL
                             checkListJobLOTOTOOperatorCustom.lockOutRemark = checkListJobLOTOTOOperator.LockOutRemark;
                             checkListJobLOTOTOOperatorCustom.tagOutDoneByOperator = checkListJobLOTOTOOperator.TagOutDoneByOperator;
                             checkListJobLOTOTOOperatorCustom.tagOutRemark = checkListJobLOTOTOOperator.TagOutRemark;
-                            checkListJobLOTOTOOperatorCustom.tryOutDoneByOperator = checkListJobLOTOTOOperator.TryOutDoneByOperator;
-                            checkListJobLOTOTOOperatorCustom.tryOutRemark = checkListJobLOTOTOOperator.TryOutRemark;
+
+
+                            var roleid = db.UserDetails.Where(m => m.UserId == checkListJobLOTOTOOperator.TryOutDoneByOperator).Select(m => m.RoleId).FirstOrDefault();
+                            if (roleid != 1 && roleid != 2)
+                            {
+                                checkListJobLOTOTOOperatorCustom.tryOutDoneByOperator = checkListJobLOTOTOOperator.TryOutDoneByOperator;
+                                checkListJobLOTOTOOperatorCustom.tryOutRemark = checkListJobLOTOTOOperator.TryOutRemark;
+                            }
+                            
+
                             checkListJobLOTOTOOperatorCustom.isJobRejected = checkListJobLOTOTOOperator.IsJobRejected;
                             //Mani
                             checkListJobLOTOTOOperatorCustom.JobRejectedReason = checkListJobLOTOTOOperator.JobRejectedReason;

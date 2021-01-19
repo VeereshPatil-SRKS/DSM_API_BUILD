@@ -57,8 +57,8 @@ namespace DSM.EntityModels
             public string checkListEndTime { get; set; }
             public string previousGrade { get; set; }
             public string currentGrade { get; set; }
-            public long? previousColor { get; set; }
-            public long? currentColor { get; set; }
+            public string previousColor { get; set; }
+            public string currentColor { get; set; }
             public string checkListJobGroup { get; set; }
             public string batchNumber { get; set; }
             public string processOrderNumber { get; set; }
