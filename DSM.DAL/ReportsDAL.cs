@@ -3,9 +3,14 @@ using DSM.DAL.Helpers;
 using DSM.DAL.Resource;
 using DSM.DBModels;
 using DSM.Interface;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using static DSM.EntityModels.CheckListJobMasterEntity;
@@ -20,10 +25,14 @@ namespace DSM.DAL
         DSMContext db = new DSMContext();
         private readonly AppSettings appSettings;
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(ReportsDAL));
-        public ReportsDAL(DSMContext _db, IOptions<AppSettings> _appSettings)
+        public static IConfiguration configuration;
+
+
+        public ReportsDAL(DSMContext _db, IOptions<AppSettings> _appSettings, IConfiguration _configuration)
         {
             db = _db;
             appSettings = _appSettings.Value;
+            configuration = _configuration;
         }
        
         #region Reports
@@ -1738,7 +1747,8 @@ namespace DSM.DAL
                 List<BarCharData> barCharDatas = new List<BarCharData>();
 
                 List<string> alllabels = new List<string>();
-                alllabels.Add("Estimated");
+                //  alllabels.Add("Estimated");
+                alllabels.Add("Target");
                 alllabels.Add("Line-1");
                 alllabels.Add("Line-2");
                // alllabels.Add("Average");
@@ -1754,8 +1764,9 @@ namespace DSM.DAL
 
                     for (DateTime st = startDate; st <= endDate; st = st.AddDays(1))
                     {
-                        if (item != "Estimated")
-                        {
+                        //if (item != "Estimated")
+                            if (item != "Target")
+                            {
                             DateTime st1 = Convert.ToDateTime(st.ToShortDateString() + " 00:00:00");
                             DateTime st2 = Convert.ToDateTime(st.ToShortDateString() + " 23:59:59");
 
@@ -1807,10 +1818,30 @@ namespace DSM.DAL
                         }
                         else
                         {
-                            var targetThisYear = db.TargetOverall.Where(m => m.TargetStartTime <= CurrentDate && m.TargetEndTime >= CurrentDate).FirstOrDefault();
 
-                            labels.Add(st.ToString("dd/MM/yyyy"));
-                            values.Add(targetThisYear.TargetValue);
+
+                            var sdatestring = CurrentDate.ToString("yyyy-MM-dd");
+
+                            var startTimee = Convert.ToDateTime(sdatestring + " 00:00:00");
+                            var endTimee = Convert.ToDateTime(sdatestring + " 23:59:59");
+
+                            //var targetThisYear = db.TargetOverall.Where(m => m.TargetStartTime >= startTimee && m.TargetEndTime <= endTimee).FirstOrDefault();
+
+                            var targetThisYear = db.TargetOverall.Where(m => m.TargetStartTime <= CurrentDate && m.TargetEndTime >= CurrentDate).FirstOrDefault();
+                            if (targetThisYear != null)
+                            {
+                                //var targetThisYear = db.TargetOverall.Where(m => m.TargetStartTime <= CurrentDate && m.TargetEndTime >= CurrentDate).FirstOrDefault();
+                                labels.Add(st.ToString("dd/MM/yyyy"));
+                                values.Add(targetThisYear.TargetValue);
+                            }
+                            else
+                            {
+                                labels.Add(st.ToString("dd/MM/yyyy"));
+                                values.Add(0);
+                            }
+
+
+
 
                         }
                     }
@@ -1914,7 +1945,7 @@ namespace DSM.DAL
                 List<BarCharData> barCharDatas = new List<BarCharData>();
 
                 List<string> alllabels = new List<string>();
-                alllabels.Add("Estimated");
+                alllabels.Add("Target");
                 alllabels.Add("Actual");
 
                 long typeId = commonFunction.GetTypeDetails(appSettings);
@@ -1936,9 +1967,18 @@ namespace DSM.DAL
 
                         foreach (var job in jobs)
                         {
-                            if (item == "Estimated")
+                            if (item == "Target")
                             {
-                                labels.Add(st.ToString("dd/MM/yyyy")+ " - " + job.CheckListJobName);
+                                if (lineNumber != 0)
+                                {
+                                    var linename = db.LineNumberMaster.Where(m => m.LineNumberId == lineNumber).Select(m => m.LineNumberName).FirstOrDefault();
+                                    labels.Add(st.ToString("dd/MM/yyyy") + " - " + job.CheckListJobName+" - "+ linename);
+                                }
+                                else
+                                {
+                                    labels.Add(st.ToString("dd/MM/yyyy") + " - " + job.CheckListJobName);
+                                }
+
                                 decimal total = 0;
                                 total = Math.Round(Convert.ToDecimal(job.EstimatedEndTime), 2);
                                 values.Add(total);
@@ -2442,6 +2482,917 @@ namespace DSM.DAL
             }
             return obj;
         }
+
+
+        //public CommonResponse BarChartAllCheckListJObForYear()
+        //{
+        //    CommonResponse obj = new CommonResponse();
+        //    CommonFunction commonFunction = new CommonFunction();
+        //    try
+        //    {
+        //        #region Date
+        //        DateTime startDate = DateTime.Now;
+        //        DateTime endDate = startDate.AddYears(-1);
+
+        //        //try
+        //        //{
+        //        //    startDate = Convert.ToDateTime(fromDate);
+        //        //}
+        //        //catch (Exception ex)
+        //        //{
+        //        //    startDate = startDate.AddDays(-7);
+        //        //}
+        //        //try
+        //        //{
+        //        //    endDate = Convert.ToDateTime(toDate);
+        //        //}
+        //        //catch (Exception ex)
+        //        //{
+
+        //        //}
+        //        #endregion
+
+
+        //        ActualVsExpected pieChart = new ActualVsExpected();
+        //        List<string> labels = new List<string>();
+        //        List<BarCharData> barCharDatas = new List<BarCharData>();
+
+        //        List<string> alllabels = new List<string>();
+        //        alllabels.Add("Target");
+        //        alllabels.Add("Actual");
+
+        //        long typeId = commonFunction.GetTypeDetails(appSettings);
+        //        DateTime CurrentDate = DateTime.Now;
+
+        //        foreach (var item in alllabels)
+        //        {
+        //            BarCharData barCharData = new BarCharData();
+        //            List<decimal> values = new List<decimal>();
+        //            barCharData.label = item;
+
+        //            for (DateTime st = endDate; st <= startDate; st = st.AddDays(1))
+        //            {
+
+        //                DateTime st1 = Convert.ToDateTime(st.ToShortDateString() + " 00:00:00");
+        //                DateTime st2 = Convert.ToDateTime(st.ToShortDateString() + " 23:59:59");
+
+        //                var jobs = db.CheckListJobMaster.Where(m => m.CheckListStartTime >= st1 && m.CheckListStartTime <= st2 && m.OverAllJobCompleted == true && m.OverAllApproved == true && m.CheckListJobTypeId == typeId && m.IsDeleted == false).ToList();
+
+        //                foreach (var job in jobs)
+        //                {
+        //                    if (item == "Target")
+        //                    {
+        //                        labels.Add(st.ToString("dd/MM/yyyy") + " - " + job.CheckListJobName);
+        //                        decimal total = 0;
+        //                        total = Math.Round(Convert.ToDecimal(job.EstimatedEndTime), 2);
+        //                        values.Add(total);
+        //                    }
+        //                    else
+        //                    {
+        //                        decimal total = 0;
+        //                        total = commonFunction.GetDateDifferenceInMins(job.CheckListStartTime, job.CheckListEndTime);
+        //                        values.Add(total);
+        //                    }
+        //                }
+        //            }
+        //            barCharData.data = values.ToArray();
+        //            barCharDatas.Add(barCharData);
+        //        }
+        //        pieChart.labels = labels.ToArray();
+        //        pieChart.datas = barCharDatas;
+
+        //        obj.isStatus = true;
+        //        obj.response = pieChart;
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        log.Error(ex); if (ex.InnerException != null) { log.Error(ex.InnerException.ToString()); }
+        //        obj.response = ResourceResponse.ExceptionMessage;
+        //        obj.isStatus = false;
+        //    }
+        //    return obj;
+        //}
+
+
+        public CommonResponse BarChartAllCheckListJObForYear()
+        {
+            CommonResponse obj = new CommonResponse();
+            CommonFunction commonFunction = new CommonFunction();
+            try
+            {
+                #region Date
+
+                DateTime startDate = DateTime.Now;
+                DateTime endDate = startDate.AddYears(-1);
+                //DateTime startDate = DateTime.Now;
+                //DateTime endDate = DateTime.Now;
+                //try
+                //{
+
+                //    startDate = Convert.ToDateTime(fromDate);
+                //    startDate = new DateTime(startDate.Year, startDate.Month, 1);
+
+                //}
+                //catch (Exception ex)
+                //{
+
+                //}
+                //try
+                //{
+                //    endDate = Convert.ToDateTime(toDate);
+                //    endDate = new DateTime(endDate.Year, endDate.Month, 1);
+                //    endDate = endDate.AddMonths(1).AddDays(-1);
+                //}
+                //catch (Exception ex)
+                //{
+
+                //}
+                #endregion
+
+                ActualVsExpected pieChart = new ActualVsExpected();
+                List<string> labels = new List<string>();
+                List<BarCharData> barCharDatas = new List<BarCharData>();
+
+                List<string> alllabels = new List<string>();
+                alllabels.Add("Line-1");
+                alllabels.Add("Line-2");
+                //alllabels.Add("Average");
+                long typeId = commonFunction.GetTypeDetails(appSettings);
+
+                DateTime CurrentDate = DateTime.Now;
+
+                foreach (var item in alllabels)
+                {
+                    BarCharData barCharData = new BarCharData();
+                    List<decimal> values = new List<decimal>();
+                    barCharData.label = item;
+
+                    for (DateTime st = endDate; st <= startDate; st = st.AddMonths(1))
+                    {
+
+                        DateTime st1 = Convert.ToDateTime(st.ToShortDateString() + " 00:00:00");
+                        st1 = new DateTime(st1.Year, st1.Month, 1);
+                        DateTime st2 = st1.AddMonths(1).AddDays(-1);
+                        st2 = Convert.ToDateTime(st2.ToShortDateString() + " 23:59:59");
+                        int lineNumber = 0;
+
+                        switch (item)
+                        {
+                            case "Line-1":
+                                lineNumber = 1;
+                                break;
+                            case "Line-2":
+                                lineNumber = 2;
+                                break;
+                            case "Average":
+                                lineNumber = 0;
+                                break;
+                        }
+
+                        var jobs = db.CheckListJobMaster.Where(m => m.CheckListStartTime >= st1 && m.CheckListStartTime <= st2 && m.OverAllJobCompleted == true && m.OverAllApproved == true && m.CheckListJobTypeId == typeId && m.IsDeleted == false).ToList();
+
+                        if (lineNumber != 0)
+                        {
+                            jobs = jobs.Where(m => m.CheckListJobLineNumber == lineNumber).ToList();
+                        }
+                        decimal total = 0;
+
+                        if (item == "Line-1")
+                        {
+                            labels.Add(st.ToString("MMM/yyyy"));
+                        }
+
+                        foreach (var job in jobs)
+                        {
+                            // total = + commonFunction.GetDateDifferenceInMins(job.CheckListStartTime, job.CheckListEndTime);
+
+                            //changed By veeresh
+                            total = total + commonFunction.GetDateDifferenceInMins(job.CheckListStartTime, job.CheckListEndTime);
+                        }
+                        if (jobs.Count != 0)
+                        {
+                            if (lineNumber != 0)
+                            {
+                                values.Add(Math.Round(total / Convert.ToDecimal(jobs.Count), 2));
+                            }
+                            else
+                            {
+                                //average of line -1 and line -2 
+                                //values.Add(Math.Round(total / (jobs.Count * Convert.ToDecimal(2)), 2));
+                            }
+                        }
+                        else
+                        {
+                            values.Add(0);
+                        }
+                    }
+                    barCharData.data = values.ToArray();
+                    barCharDatas.Add(barCharData);
+                }
+
+                BarCharData barCharDataAvg = new BarCharData();
+                barCharDataAvg.label = "Average";
+                List<decimal> valuesAvg = new List<decimal>();
+                for (int i = 0; i < labels.Count; i++)
+                {
+                    decimal total = barCharDatas[0].data[i] + barCharDatas[1].data[i];
+                    valuesAvg.Add(Math.Round(total / Convert.ToDecimal(2), 2));
+                }
+                barCharDataAvg.data = valuesAvg.ToArray();
+                barCharDatas.Add(barCharDataAvg);
+
+
+                pieChart.labels = labels.ToArray();
+                pieChart.datas = barCharDatas;
+
+                obj.isStatus = true;
+                obj.response = pieChart;
+
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex); if (ex.InnerException != null) { log.Error(ex.InnerException.ToString()); }
+                obj.response = ResourceResponse.ExceptionMessage;
+                obj.isStatus = false;
+            }
+            return obj;
+        }
+
+
+
+        //public CommonResponse BarChartAllCheckListJObForMonth()
+        //{
+        //    CommonResponse obj = new CommonResponse();
+        //    CommonFunction commonFunction = new CommonFunction();
+        //    try
+        //    {
+        //        #region Date
+        //        DateTime startDate = DateTime.Now;
+        //        DateTime endDate = startDate.AddMonths(-1);
+
+        //        #endregion
+
+
+        //        ActualVsExpected pieChart = new ActualVsExpected();
+        //        List<string> labels = new List<string>();
+        //        List<BarCharData> barCharDatas = new List<BarCharData>();
+
+        //        List<string> alllabels = new List<string>();
+        //        alllabels.Add("Target");
+        //        alllabels.Add("Actual");
+
+        //        long typeId = commonFunction.GetTypeDetails(appSettings);
+        //        DateTime CurrentDate = DateTime.Now;
+
+        //        foreach (var item in alllabels)
+        //        {
+        //            BarCharData barCharData = new BarCharData();
+        //            List<decimal> values = new List<decimal>();
+        //            barCharData.label = item;
+
+        //            for (DateTime st = endDate; st <= startDate; st = st.AddDays(1))
+        //            {
+
+        //                DateTime st1 = Convert.ToDateTime(st.ToShortDateString() + " 00:00:00");
+        //                DateTime st2 = Convert.ToDateTime(st.ToShortDateString() + " 23:59:59");
+
+        //                var jobs = db.CheckListJobMaster.Where(m => m.CheckListStartTime >= st1 && m.CheckListStartTime <= st2 && m.OverAllJobCompleted == true && m.OverAllApproved == true && m.CheckListJobTypeId == typeId && m.IsDeleted == false).ToList();
+
+        //                foreach (var job in jobs)
+        //                {
+        //                    if (item == "Target")
+        //                    {
+        //                        labels.Add(st.ToString("dd/MM/yyyy") + " - " + job.CheckListJobName);
+        //                        decimal total = 0;
+        //                        total = Math.Round(Convert.ToDecimal(job.EstimatedEndTime), 2);
+        //                        values.Add(total);
+        //                    }
+        //                    else
+        //                    {
+        //                        decimal total = 0;
+        //                        total = commonFunction.GetDateDifferenceInMins(job.CheckListStartTime, job.CheckListEndTime);
+        //                        values.Add(total);
+        //                    }
+        //                }
+        //            }
+        //            barCharData.data = values.ToArray();
+        //            barCharDatas.Add(barCharData);
+        //        }
+        //        pieChart.labels = labels.ToArray();
+        //        pieChart.datas = barCharDatas;
+
+        //        obj.isStatus = true;
+        //        obj.response = pieChart;
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        log.Error(ex); if (ex.InnerException != null) { log.Error(ex.InnerException.ToString()); }
+        //        obj.response = ResourceResponse.ExceptionMessage;
+        //        obj.isStatus = false;
+        //    }
+        //    return obj;
+        //}
+
+        public CommonResponseTable BarChartAllCheckListJObForMonth()
+        {
+            CommonResponseTable obj = new CommonResponseTable();
+            CommonFunction commonFunction = new CommonFunction();
+            try
+            {
+                #region Date
+                DateTime startDate = DateTime.Now;
+                 DateTime endDate = startDate.AddMonths(-1);
+                //try
+                //{
+                //    startDate = Convert.ToDateTime(fromDate);
+                //}
+                //catch (Exception ex)
+                //{
+                //    startDate = startDate.AddDays(-7);
+                //}
+                //try
+                //{
+                //    endDate = Convert.ToDateTime(toDate);
+                //}
+                //catch (Exception ex)
+                //{
+                //}
+                #endregion
+
+                ActualVsExpected pieChart = new ActualVsExpected();
+                List<string> labels = new List<string>();
+                List<BarCharData> barCharDatas = new List<BarCharData>();
+
+                List<string> alllabels = new List<string>();
+                //  alllabels.Add("Estimated");
+                alllabels.Add("Target");
+                alllabels.Add("Line-1");
+                alllabels.Add("Line-2");
+                // alllabels.Add("Average");
+                long typeId = commonFunction.GetTypeDetails(appSettings);
+                DateTime CurrentDate = DateTime.Now;
+
+                foreach (var item in alllabels)
+                {
+                    BarCharData barCharData = new BarCharData();
+                    List<decimal> values = new List<decimal>();
+                    barCharData.label = item;
+
+
+                  //  for (DateTime st = startDate; st <= endDate; st = st.AddDays(1))
+
+                      for(  DateTime st = endDate; st <= startDate; st = st.AddDays(1))
+                    {
+                        //if (item != "Estimated")
+                        if (item != "Target")
+                        {
+                            DateTime st1 = Convert.ToDateTime(st.ToShortDateString() + " 00:00:00");
+                            DateTime st2 = Convert.ToDateTime(st.ToShortDateString() + " 23:59:59");
+
+                            int lineNumber = 0;
+
+                            switch (item)
+                            {
+                                case "Line-1":
+                                    lineNumber = 1;
+                                    break;
+                                case "Line-2":
+                                    lineNumber = 2;
+                                    break;
+                                case "Average":
+                                    lineNumber = 0;
+                                    break;
+                            }
+
+                            var jobs = db.CheckListJobMaster.Where(m => m.CheckListStartTime >= st1 && m.CheckListStartTime <= st2 && m.OverAllJobCompleted == true && m.OverAllApproved == true && m.IsDeleted == false).ToList();
+
+                            if (lineNumber != 0)
+                            {
+                                jobs = jobs.Where(m => m.CheckListJobLineNumber == lineNumber).ToList();
+                            }
+
+                            decimal total = 0;
+                            foreach (var job in jobs)
+                            {
+                                total = total + commonFunction.GetDateDifferenceInMins(job.CheckListStartTime, job.CheckListEndTime);
+                            }
+
+                            if (jobs.Count != 0)
+                            {
+                                if (item == "Average")
+                                {
+                                    // values.Add(Math.Round(total / (jobs.Count * Convert.ToDecimal(2)), 2));
+                                }
+                                else
+                                {
+                                    values.Add(Math.Round(total / Convert.ToDecimal(jobs.Count), 2));
+                                }
+
+                            }
+                            else
+                            {
+                                values.Add(0);
+                            }
+
+                        }
+                        else
+                        {
+
+
+                            var sdatestring = CurrentDate.ToString("yyyy-MM-dd");
+
+                            var startTimee = Convert.ToDateTime(sdatestring + " 00:00:00");
+                            var endTimee = Convert.ToDateTime(sdatestring + " 23:59:59");
+
+                            //var targetThisYear = db.TargetOverall.Where(m => m.TargetStartTime >= startTimee && m.TargetEndTime <= endTimee).FirstOrDefault();
+
+                            var targetThisYear = db.TargetOverall.Where(m => m.TargetStartTime <= CurrentDate && m.TargetEndTime >= CurrentDate).FirstOrDefault();
+                            if (targetThisYear != null)
+                            {
+                                //var targetThisYear = db.TargetOverall.Where(m => m.TargetStartTime <= CurrentDate && m.TargetEndTime >= CurrentDate).FirstOrDefault();
+                                labels.Add(st.ToString("dd/MM/yyyy"));
+                                values.Add(targetThisYear.TargetValue);
+                            }
+                            else
+                            {
+                                labels.Add(st.ToString("dd/MM/yyyy"));
+                                values.Add(0);
+                            }
+
+
+
+
+                        }
+                    }
+                    barCharData.data = values.ToArray();
+                    barCharDatas.Add(barCharData);
+                }
+
+
+                BarCharData barCharDataAvg = new BarCharData();
+                barCharDataAvg.label = "Average";
+                List<decimal> valuesAvg = new List<decimal>();
+                for (int i = 0; i < labels.Count; i++)
+                {
+                    decimal total = barCharDatas[1].data[i] + barCharDatas[2].data[i];
+                    valuesAvg.Add(Math.Round(total / Convert.ToDecimal(2), 2));
+                }
+                barCharDataAvg.data = valuesAvg.ToArray();
+                barCharDatas.Add(barCharDataAvg);
+
+
+                pieChart.labels = labels.ToArray();
+                pieChart.datas = barCharDatas;
+
+                LineGraphTable lineGraphTable = new LineGraphTable();
+                try
+                {
+                    decimal target = (barCharDatas[0].data.Sum() / barCharDatas[0].data.Count());
+                    target = Math.Round(target, 1);
+                    decimal line1Sumation = (barCharDatas[1].data.Sum() / barCharDatas[1].data.Count());
+                    line1Sumation = Math.Round(line1Sumation, 1);
+                    decimal line2Sumation = (barCharDatas[2].data.Sum() / barCharDatas[2].data.Count());
+                    line2Sumation = Math.Round(line2Sumation, 1);
+                    decimal avgSumation = (barCharDatas[3].data.Sum() / barCharDatas[3].data.Count());
+                    avgSumation = Math.Round(avgSumation, 1);
+                    lineGraphTable.estimatedL1 = target.ToString();
+                    lineGraphTable.estimatedL2 = target.ToString();
+                    lineGraphTable.estimatedAverage = target.ToString();
+                    lineGraphTable.actualL1 = line1Sumation.ToString();
+                    lineGraphTable.actualL2 = line2Sumation.ToString();
+                    lineGraphTable.actualAverage = avgSumation.ToString();
+                }
+                catch (Exception ex)
+                { }
+
+                obj.isStatus = true;
+                obj.response = pieChart;
+                obj.responseTable = lineGraphTable;
+
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex); if (ex.InnerException != null) { log.Error(ex.InnerException.ToString()); }
+                obj.response = ResourceResponse.ExceptionMessage;
+                obj.isStatus = false;
+            }
+            return obj;
+        }
+
+
+        public CommonResponse BarChartAllCheckListJObForMonthLine1()
+        {
+            CommonResponse obj = new CommonResponse();
+            CommonFunction commonFunction = new CommonFunction();
+            try
+            {
+                #region Date
+                DateTime startDate = DateTime.Now;
+                DateTime endDate = startDate.AddMonths(-1);
+
+                #endregion
+
+
+                ActualVsExpected pieChart = new ActualVsExpected();
+                List<string> labels = new List<string>();
+                List<BarCharData> barCharDatas = new List<BarCharData>();
+
+                List<string> alllabels = new List<string>();
+                alllabels.Add("Target");
+                alllabels.Add("Actual");
+
+                long typeId = commonFunction.GetTypeDetails(appSettings);
+                DateTime CurrentDate = DateTime.Now;
+
+                foreach (var item in alllabels)
+                {
+                    BarCharData barCharData = new BarCharData();
+                    List<decimal> values = new List<decimal>();
+                    barCharData.label = item;
+
+                    for (DateTime st = endDate; st <= startDate; st = st.AddDays(1))
+                    {
+
+                        DateTime st1 = Convert.ToDateTime(st.ToShortDateString() + " 00:00:00");
+                        DateTime st2 = Convert.ToDateTime(st.ToShortDateString() + " 23:59:59");
+
+                        var jobs = db.CheckListJobMaster.Where(m => m.CheckListStartTime >= st1 && m.CheckListStartTime <= st2 && m.OverAllJobCompleted == true && m.OverAllApproved == true && m.CheckListJobLineNumber == 1 && m.CheckListJobTypeId == typeId && m.IsDeleted == false).ToList();
+
+                        foreach (var job in jobs)
+                        {
+                            if (item == "Target")
+                            {
+                                var linename = db.LineNumberMaster.Where(m => m.LineNumberId == 1).Select(m => m.LineNumberName).FirstOrDefault();
+                              
+                                labels.Add(st.ToString("dd/MM/yyyy") + " - " + job.CheckListJobName + " - " + linename);
+                                decimal total = 0;
+                                total = Math.Round(Convert.ToDecimal(job.EstimatedEndTime), 2);
+                                values.Add(total);
+                            }
+                            else
+                            {
+                                decimal total = 0;
+                                total = commonFunction.GetDateDifferenceInMins(job.CheckListStartTime, job.CheckListEndTime);
+                                values.Add(total);
+                            }
+                        }
+                    }
+                    barCharData.data = values.ToArray();
+                    barCharDatas.Add(barCharData);
+                }
+                pieChart.labels = labels.ToArray();
+                pieChart.datas = barCharDatas;
+
+                obj.isStatus = true;
+                obj.response = pieChart;
+
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex); if (ex.InnerException != null) { log.Error(ex.InnerException.ToString()); }
+                obj.response = ResourceResponse.ExceptionMessage;
+                obj.isStatus = false;
+            }
+            return obj;
+        }
+
+
+        public CommonResponse BarChartAllCheckListJObForMonthLine2()
+        {
+            CommonResponse obj = new CommonResponse();
+            CommonFunction commonFunction = new CommonFunction();
+            try
+            {
+                #region Date
+                DateTime startDate = DateTime.Now;
+                DateTime endDate = startDate.AddMonths(-1);
+
+                #endregion
+
+
+                ActualVsExpected pieChart = new ActualVsExpected();
+                List<string> labels = new List<string>();
+                List<BarCharData> barCharDatas = new List<BarCharData>();
+
+                List<string> alllabels = new List<string>();
+                alllabels.Add("Target");
+                alllabels.Add("Actual");
+
+                long typeId = commonFunction.GetTypeDetails(appSettings);
+                DateTime CurrentDate = DateTime.Now;
+
+                foreach (var item in alllabels)
+                {
+                    BarCharData barCharData = new BarCharData();
+                    List<decimal> values = new List<decimal>();
+                    barCharData.label = item;
+
+                    for (DateTime st = endDate; st <= startDate; st = st.AddDays(1))
+                    {
+
+                        DateTime st1 = Convert.ToDateTime(st.ToShortDateString() + " 00:00:00");
+                        DateTime st2 = Convert.ToDateTime(st.ToShortDateString() + " 23:59:59");
+
+                        var jobs = db.CheckListJobMaster.Where(m => m.CheckListStartTime >= st1 && m.CheckListStartTime <= st2 && m.OverAllJobCompleted == true && m.OverAllApproved == true && m.CheckListJobLineNumber == 2 && m.CheckListJobTypeId == typeId && m.IsDeleted == false).ToList();
+
+                        foreach (var job in jobs)
+                        {
+                            if (item == "Target")
+                            {
+
+                                var linename = db.LineNumberMaster.Where(m => m.LineNumberId == 2).Select(m => m.LineNumberName).FirstOrDefault();
+
+                                labels.Add(st.ToString("dd/MM/yyyy") + " - " + job.CheckListJobName+" - "+ linename);
+                                decimal total = 0;
+                                total = Math.Round(Convert.ToDecimal(job.EstimatedEndTime), 2);
+                                values.Add(total);
+                            }
+                            else
+                            {
+                                decimal total = 0;
+                                total = commonFunction.GetDateDifferenceInMins(job.CheckListStartTime, job.CheckListEndTime);
+                                values.Add(total);
+                            }
+                        }
+                    }
+                    barCharData.data = values.ToArray();
+                    barCharDatas.Add(barCharData);
+                }
+                pieChart.labels = labels.ToArray();
+                pieChart.datas = barCharDatas;
+
+                obj.isStatus = true;
+                obj.response = pieChart;
+
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex); if (ex.InnerException != null) { log.Error(ex.InnerException.ToString()); }
+                obj.response = ResourceResponse.ExceptionMessage;
+                obj.isStatus = false;
+            }
+            return obj;
+        }
+
+
+        public CommonResponse ChangeOverTimeReport(COReport data)
+        {
+            CommonResponse obj = new CommonResponse();
+
+            try
+            {
+                string[] machinelistids;
+
+
+                DateTime FromDate = DateTime.Now;
+                try
+                {
+                    string[] dt = data.fromDate.Split('/');
+                    string frDate = dt[2] + '-' + dt[1] + '-' + dt[0];
+                    FromDate = Convert.ToDateTime(frDate);
+                }
+                catch
+                {
+                    FromDate = Convert.ToDateTime(data.fromDate);
+                }
+                DateTime ToDate = DateTime.Now;
+                try
+                {
+                    string[] dt = data.toDate.Split('/');
+                    string torDate = dt[2] + '-' + dt[1] + '-' + dt[0];
+                    ToDate = Convert.ToDateTime(torDate);
+                }
+                catch
+                {
+                    ToDate = Convert.ToDateTime(data.toDate).AddHours(24);
+                }
+
+
+
+                int dateDifference = Convert.ToDateTime(ToDate).Subtract(Convert.ToDateTime(FromDate)).Days;
+
+
+
+
+
+                FileInfo templateFile = new FileInfo(@"C:\SRKS_ifacility\MainTemplate\DSM_ChageOverTime_Report_Template.xlsx");
+                //FileInfo templateFile = new FileInfo(@"C:\SRKS_ifacility\MainTemplate\ChangeOverTimeReport.xlsx");
+
+                ExcelPackage templatep = new ExcelPackage(templateFile);
+                ExcelWorksheet Templatews = templatep.Workbook.Worksheets[0];
+                //ExcelWorksheet TemplateGraph = templatep.Workbook.Worksheets[1];
+
+
+                //excel file save and  downloaded link
+
+
+                var line12 = db.LineNumberMaster.Where(m => m.LineNumberId == data.lineNo).Select(m => m.LineNumberName).FirstOrDefault();
+
+
+                string ImageUrlSave = configuration.GetSection("AppSettings").GetSection("ImageUrlSave").Value;
+                string ImageUrl = configuration.GetSection("AppSettings").GetSection("ImageUrl").Value;
+
+                String FileDir = ImageUrlSave + "\\" + "ChangeOverTimeReport_" + line12 + "_" + Convert.ToDateTime(ToDate).ToString("yyyy-MM-dd") + ".xlsx";
+                String retrivalPath = ImageUrl + "ChangeOverTimeReport_" + line12 + "_" + Convert.ToDateTime(ToDate).ToString("yyyy-MM-dd") + ".xlsx";
+
+
+                FileInfo newFile = new FileInfo(FileDir);
+
+                if (newFile.Exists)
+                {
+                    try
+                    {
+                        newFile.Delete();
+                        newFile = new FileInfo(FileDir);
+                    }
+
+                    catch (Exception ex)
+
+                    {
+                        obj.response = ResourceResponse.ExceptionMessage; ;
+                    }
+                }
+
+
+                //Using the File for generation and populating it
+                ExcelPackage p = null;
+                p = new ExcelPackage(newFile);
+                ExcelWorksheet worksheet = null;
+                ExcelWorksheet worksheetGraph = null;
+
+
+                try
+                {
+                    //worksheet = p.Workbook.Worksheets.Add(Convert.ToDateTime(ToDate).ToString("dd-MM-yyyy"), Templatews);
+                    worksheet = p.Workbook.Worksheets.Add(line12, Templatews);
+                    //worksheetGraph = p.Workbook.Worksheets.Add("Break down analyis", TemplateGraph);
+                }
+                catch { }
+
+                if (worksheet == null)
+                {
+                    worksheet = p.Workbook.Worksheets.Add(Convert.ToDateTime(ToDate).ToString("dd-MM-yyyy") + "1", Templatews);
+                    //worksheetGraph = p.Workbook.Worksheets.Add(System.DateTime.Now.ToString("dd-MM-yyyy") + "Break down analyis", TemplateGraph);
+                }
+                else if (worksheetGraph == null)
+                {
+                    //worksheetGraph = p.Workbook.Worksheets.Add(System.DateTime.Now.ToString("dd-MM-yyyy") + "Break down analyis", TemplateGraph);
+                }
+                int sheetcount = p.Workbook.Worksheets.Count;
+                p.Workbook.Worksheets.MoveToStart(sheetcount - 1);
+                worksheet.Cells.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                worksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+
+                int StartRow = 5;
+
+
+
+                DateTime st1 = Convert.ToDateTime(FromDate.ToShortDateString() + " 00:00:00");
+                DateTime st2 = Convert.ToDateTime(ToDate.ToShortDateString() + " 23:59:59");
+
+
+
+                var jobs = db.CheckListJobMaster.Where(m => m.CheckListStartTime >= st1 && m.CheckListStartTime <= st2 && m.OverAllJobCompleted == true && m.OverAllApproved == true && m.CheckListJobLineNumber == data.lineNo && m.IsDeleted == false).OrderBy(m => m.CheckListStartTime).ToList();
+
+                if (jobs.Count > 0)
+                {
+
+
+                    double totoltime = 0;
+                    int countNo = 0;
+
+                    foreach (var job in jobs)
+                    {
+
+
+                        var weeke = (DateTime)job.CheckListStartTime;
+
+                        var datee = Convert.ToDateTime(job.CheckListStartTime);
+                        worksheet.Cells["A" + StartRow].Value = datee.ToString("dd-MMM-yy");
+
+                        var shiftname = db.ShiftMaster.Where(m => m.ShiftId == job.CheckListShiftNumber).Select(m => m.ShiftName).FirstOrDefault();
+                        worksheet.Cells["B" + StartRow].Value = shiftname;
+
+                        var preGrade = db.GradeMaster.Where(m => m.GradeId == job.PreviousGrade).Select(m => m.GradeName).FirstOrDefault();
+                        worksheet.Cells["C" + StartRow].Value = preGrade;
+
+                        var nxtGrade = db.GradeMaster.Where(m => m.GradeId == job.CurrentColor).Select(m => m.GradeName).FirstOrDefault();
+                        worksheet.Cells["D" + StartRow].Value = nxtGrade;
+                        var typeName = db.CheckListTypeMaster.Where(m => m.CheckListTypeId == job.CheckListJobTypeId).Select(m => m.CheckListTypeName).FirstOrDefault();
+                        worksheet.Cells["E" + StartRow].Value = typeName;
+
+                        var Stdatee = Convert.ToDateTime(job.CheckListStartTime);
+                        worksheet.Cells["F" + StartRow].Value = Stdatee.ToString("yyyy-MM-dd hh:mm:ss");
+
+                        var Eddatee = Convert.ToDateTime(job.CheckListEndTime);
+                        worksheet.Cells["G" + StartRow].Value = Eddatee.ToString("yyyy-MM-dd hh:mm:ss");
+
+                        var totaltimee = ((DateTime)(job.CheckListEndTime) - (DateTime)(job.CheckListStartTime)).TotalMinutes;
+                        worksheet.Cells["H" + StartRow].Value = Math.Round(totaltimee, 2);
+                        //var weekkk = 33 / 7;
+                        //worksheet.Cells["I" + StartRow].Value = weekkk;
+
+                        if (totaltimee <= job.EstimatedEndTime)
+                        {
+                            worksheet.Cells["M" + StartRow].Value = "Time Achieved";
+
+                            using (ExcelRange Rng = worksheet.Cells["M" + StartRow])
+                            {
+                                // Rng.Value = "Text Color & Background Color";
+                                // Rng.Merge = true;
+                                // Rng.Style.Font.Bold = true;
+
+                                // Rng.Style.Font.Color.SetColor(Color.Red);
+                                Rng.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                                Rng.Style.Fill.BackgroundColor.SetColor(Color.Green);
+                            }
+
+
+
+
+                        }
+                        else
+                        {
+                            worksheet.Cells["M" + StartRow].Value = "Extra Time";
+                            using (ExcelRange Rng = worksheet.Cells["M" + StartRow])
+                            {
+                                // Rng.Value = "Text Color & Background Color";
+                                // Rng.Merge = true;
+                                // Rng.Style.Font.Bold = true;
+
+                                // Rng.Style.Font.Color.SetColor(Color.Red);
+                                Rng.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                                Rng.Style.Fill.BackgroundColor.SetColor(Color.Red);
+                            }
+
+
+                        }
+
+                        var usernames = db.CheckListJobAssignedResourceMaster.Where(m => m.CheckListJobMasterId == job.CheckListJobId).ToList();
+                        List<string> userlist = new List<string>();
+                        string alluserIds = "";
+                        foreach (var alluser in usernames)
+                        {
+
+                            var alluserId1 = alluser.PrimaryResource;
+                            alluserIds += alluserId1 + ",";
+                        }
+                        alluserIds = alluserIds.TrimEnd(',');
+                        var userarray = alluserIds.Split(',');
+                        var userlists = userarray.ToList().Distinct();
+
+                        //var disUs = userLists.Distinct();
+                        string usernameall = "";
+                        foreach (var urs in userlists)
+                        {
+                            int usIds = Convert.ToInt32(urs);
+                            var usernamess = db.UserDetails.Where(m => m.UserId == usIds).Select(m => m.UserName).FirstOrDefault();
+                            usernameall = usernamess + ",";
+
+
+                        }
+
+                        worksheet.Cells["N" + StartRow].Value = usernameall.TrimEnd(',');
+
+
+
+                        totoltime = totoltime + totaltimee;
+                        countNo = countNo + 1;
+                        StartRow++;
+
+                    }
+
+
+                    worksheet.Cells["C2"].Value = "Average COT " + line12 + " (Hrs)";
+                    worksheet.Cells["D2"].Value = Math.Round(((totoltime / countNo) / 60), 2);
+
+                    worksheet.Cells["H2"].Value = countNo;
+
+                }
+
+                p.Save();
+
+                obj.isStatus = true;
+                obj.response = retrivalPath;
+
+                //Downloding Excel
+                //  string path1 = System.IO.Path.Combine(FileDir, "OEE_Report" + Convert.ToDateTime(ToDate).ToString("yyyy-MM-dd") + ".xlsx");
+
+
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex); if (ex.InnerException != null) { log.Error(ex.InnerException.ToString()); }
+                obj.response = ResourceResponse.ExceptionMessage;
+                obj.isStatus = false;
+            }
+
+            return obj;
+        }
+
+
         #endregion
     }
 }

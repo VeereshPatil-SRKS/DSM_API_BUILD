@@ -58,9 +58,15 @@ namespace DSM
 
             //var connection = @"Server=DESKTOP-77NC6JC;Database=DSM;user id=sa;password=srks4$;";
 
-          //  var connection = @"Server=DESKTOP-N18DDM0\SQLEXPRESS;Database=DSM;user id=sa;password=srks4$;";
+            //  var connection = @"Server=DESKTOP-N18DDM0\SQLEXPRESS;Database=DSM;user id=sa;password=srks4$;";
 
-           var connection = @"Server=TCP:13.233.129.21,8090;Database=DSM;user id=sa;password=srks4$;";
+            // var connection = @"Server=TCP:13.233.129.21,8090;Database=DSM_Local;user id=sa;password=srks4$;";
+
+          //  var connection = @"Server=TCP:54.224.28.104,1433;Database=DSM_Local;user id=sa;password=srks4$;";
+
+          //  var connection = @"Server=TCP:54.224.28.104,1433;Database=DSM;user id=sa;password=srks4$;";
+            var connection = @"Server=TCP:34.236.191.1,1433;Database=DSM;user id=sa;password=srks4$;";
+
             services.AddDbContext<DSMContext>(options => options.UseSqlServer(connection));
 
             services.AddCors(options =>

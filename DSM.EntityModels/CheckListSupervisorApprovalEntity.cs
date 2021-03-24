@@ -41,7 +41,9 @@ namespace DSM.EntityModels
             public long? currentColor { get; set; }
             public string currentColorName { get; set; }
             public string assignedOperators { get; set; }
+            public operatorInArray[] assignedOperatorsInArray { get; set; }
             public string jobCreatedBy { get; set; }
+
             public string totalTimeTook { get; set; }
             public bool approveButton { get; set; }
             public bool rejectButton { get; set; }
@@ -59,6 +61,17 @@ namespace DSM.EntityModels
 
 
         }
+
+
+        public class operatorInArray
+        {
+            public long userId { get; set; }
+           
+            public string userName { get; set; }
+           
+        }
+
+
 
         //Mani
         public class CheckListJobDetailsLotato
@@ -186,6 +199,8 @@ namespace DSM.EntityModels
             //Mani
             public string JobRejectedReason { get; set; }
             //Mani
+
+            public bool isJobCompleted { get; set; }
         }
 
         public class CheckListJobActivityBySubCategory
@@ -230,6 +245,8 @@ namespace DSM.EntityModels
             //Mani
             public string JobRejectedReason { get; set; }
             //Mani
+
+            public bool isJobCompleted { get; set; }
         }
 
         //Mani
@@ -306,6 +323,9 @@ namespace DSM.EntityModels
             public bool? isJobRejected { get; set; }
 
             public string JobRejectedReason { get; set; }
+
+            public bool isJobCompleted { get; set; }
+
         }
 
         public class CheckListJobLOTOTOOperatorCustomAdmin
@@ -411,6 +431,19 @@ namespace DSM.EntityModels
             public bool tagOut { get; set; }
             
         }
+
+
+        public class remainigGroup
+        {
+            public long checkListJobMasterId { get; set; }
+            public long groupId { get; set; }
+            public string groupName { get; set; }
+            public bool isThisGroupAllJobsCompleted { get; set; }
+          
+
+        }
+
+
 
 
 

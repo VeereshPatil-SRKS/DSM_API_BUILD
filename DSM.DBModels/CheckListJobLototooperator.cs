@@ -27,5 +27,8 @@ namespace DSM.DBModels
         public DateTime? ActivityEndTime { get; set; }
         public bool? IsJobRejected { get; set; }
         public string JobRejectedReason { get; set; }
+        public int? checkListJobId { get; set; }
+        public int? checkListJobGroupId { get; set; }
+        public int? isAdminDoneLototo { get; set; }
     }
 }

@@ -35,5 +35,11 @@ namespace DSM.Interface
         CommonResponse ViewMultipleCheckListGroupByCheckListJobMasterIdAfterJobCompletion(int checkListJobMasterId);
         CommonResponse ViewMultipleSupervisorForReassigningJob(int superVisorId);
         CommonResponse ReassigningJobToSupervisor(int checkListJobId, int superVisorId, long userId);
+
+        CommonResponse ViewRemainingOperatorjobGroupsList(int checkListJobId,long userId);
+
+        CommonResponse ViewRemainingOperatorCheckListJobs(int checkListJobId, int checkListJobGroupId, long userId);
+
+
     }
 }

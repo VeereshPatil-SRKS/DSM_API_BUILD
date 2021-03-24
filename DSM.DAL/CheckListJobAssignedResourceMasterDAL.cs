@@ -408,5 +408,112 @@ namespace DSM.DAL
             return obj;
         }
 
+
+        public CommonResponse AddAndEditReAssignedCheckListJobResources(CheckListJobAssignedResourceMasterCustom data, long userId = 0)
+        {
+            CommonResponse obj = new CommonResponse();
+            try
+            {
+                var res = db.ReAssignedcheckListJobResourcesOperator.Where(m => m.CheckListJobMasterId == data.checkListJobMasterId && m.CheckListJobGroupId == data.checkListJobGroupId && m.IsDeleted == false).FirstOrDefault();
+                if (res == null)
+                {
+                    try
+                    {
+                        ReAssignedcheckListJobResourcesOperator item = new ReAssignedcheckListJobResourcesOperator();
+
+                        var assignOp=db.CheckListJobAssignedResourceMaster.Where(m => m.CheckListJobMasterId == data.checkListJobMasterId && m.CheckListJobGroupId == data.checkListJobGroupId && m.IsDeleted == false).FirstOrDefault();
+                        
+                        if (assignOp != null)
+                        {
+                            item.SecondaryResource = assignOp.PrimaryResource;
+                            item.ChecklistJobFirstOperatorIds = assignOp.PrimaryResource;
+                        }
+
+                        //var mainOp = db.CheckListJobMaster.Where(m => m.CheckListJobId == data.checkListJobMasterId).FirstOrDefault();
+                        //if (mainOp!=null)
+                        //{
+                        //    item.ChecklistJobFirstOperatorIds= mainOp.as
+
+
+                        //}
+                        item.IsReassigned = 1;
+                        item.CheckListJobMasterId = data.checkListJobMasterId;
+                        item.CheckListJobGroupId = data.checkListJobGroupId;
+                        item.PrimaryResource = data.primaryResource;
+                        item.PrimaryResourceToAllFlag = data.primaryResourceToAllFlag;
+                        //item.SecondaryResource = data.secondaryResource;
+                        item.SecondaryResourceToAllFlag = data.secondaryResourceToAllFlag;
+
+                        item.IsActive = true;
+                        item.IsDeleted = false;
+                        item.CreatedBy = userId;
+                        item.CreatedOn = DateTime.Now;
+                        db.ReAssignedcheckListJobResourcesOperator.Add(item);
+                        db.SaveChanges();
+
+                        //update FirstAssign tbl
+                        assignOp.PrimaryResource = data.primaryResource;
+                        db.SaveChanges();
+                        obj.response = ResourceResponse.AddedSucessfully;
+                        obj.isStatus = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Error(ex); if (ex.InnerException != null) { log.Error(ex.InnerException.ToString()); }
+                        obj.response = ResourceResponse.ExceptionMessage;
+                        obj.isStatus = false;
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        var assignOp = db.CheckListJobAssignedResourceMaster.Where(m => m.CheckListJobMasterId == data.checkListJobMasterId && m.CheckListJobGroupId == data.checkListJobGroupId && m.IsDeleted == false).FirstOrDefault();
+
+                        if (assignOp != null)
+                        {
+                            res.SecondaryResource = assignOp.PrimaryResource;
+                        }
+
+
+
+                        res.CheckListJobMasterId = data.checkListJobMasterId;
+                        res.CheckListJobGroupId = data.checkListJobGroupId;
+                        res.PrimaryResource = data.primaryResource;
+                        res.PrimaryResourceToAllFlag = data.primaryResourceToAllFlag;
+
+                       
+                        //res.SecondaryResource = data.secondaryResource;
+                        res.SecondaryResourceToAllFlag = data.secondaryResourceToAllFlag;
+                        res.ModifiedBy = userId;
+                        res.ModifiedOn = DateTime.Now;
+                        db.SaveChanges();
+
+                        assignOp.PrimaryResource = data.primaryResource;
+                        db.SaveChanges();
+
+                        obj.response = ResourceResponse.UpdatedSucessfully;
+                        obj.isStatus = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Error(ex); if (ex.InnerException != null) { log.Error(ex.InnerException.ToString()); }
+                        obj.response = ResourceResponse.ExceptionMessage;
+                        obj.isStatus = false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex); if (ex.InnerException != null) { log.Error(ex.InnerException.ToString()); }
+                obj.response = ResourceResponse.ExceptionMessage;
+                obj.isStatus = false;
+            }
+            return obj;
+        }
+
+
+
+
     }
 }

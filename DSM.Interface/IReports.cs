@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using static DSM.EntityModels.CommonEntity;
+using static DSM.EntityModels.ReportsEntity;
 
 namespace DSM.Interface
 {
@@ -21,6 +22,16 @@ namespace DSM.Interface
         CommonResponse PieChartAllJobsDetails(long userId);
         CommonResponse BarChartAllCheckListAverageTimeTaken(long userId);
         CommonResponse DonutChartAllActivityAverageTimeTaken(int checkListId,long userId);
-    
+
+
+
+        //veeresh code 
+        CommonResponse BarChartAllCheckListJObForYear();
+        CommonResponseTable BarChartAllCheckListJObForMonth();
+        CommonResponse BarChartAllCheckListJObForMonthLine1();
+        CommonResponse BarChartAllCheckListJObForMonthLine2();
+
+        CommonResponse ChangeOverTimeReport(COReport data);
+
     }
 }

@@ -224,5 +224,34 @@ namespace DSM.Controllers
 
             return Ok(response);
         }
+
+
+        //veeresh code for re assigning job to another operator
+        [HttpPost]
+        [Route("CheckListJobAssignedResource/AddAndEditReAssignedCheckListJobResources")]
+        public async Task<IActionResult> AddAndEditReAssignedCheckListJobResources(CheckListJobAssignedResourceMasterCustom data)
+        {
+            #region Authorization code
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            string id = "";
+            string role = "";
+            if (identity != null)
+            {
+                IEnumerable<Claim> claims = identity.Claims;
+                // or
+                id = identity.Claims.Where(m => m.Type == ClaimTypes.Sid).Select(m => m.Value).FirstOrDefault();
+                role = identity.Claims.Where(m => m.Type == ClaimTypes.Role).Select(m => m.Value).FirstOrDefault();
+            }
+            long userId = Convert.ToInt32(id);
+            #endregion
+            //calling CheckListJobAssignedResourceDAL busines layer
+            CommonResponse response = new CommonResponse();
+            response = checkListJobAssignedResourceMaster.AddAndEditReAssignedCheckListJobResources(data, userId);
+
+            return Ok(response);
+        }
+
+
+
     }
 }

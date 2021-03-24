@@ -107,7 +107,7 @@ namespace DSM.DAL
                     try
                     {
                         CheckListJobWrtoperator item = new CheckListJobWrtoperator();
-                        item.CheckListJobMasterId = Convert.ToInt32(data.checkListJobMasterId);
+                        item.CheckListJobMasterId = Convert.ToInt64(data.checkListJobMasterId);
                         item.CheckListJobGroupId = data.checkListJobGroupId;
                         item.OperatorId = userId;
                         item.CheckListJobStartTime = DateTime.Now;

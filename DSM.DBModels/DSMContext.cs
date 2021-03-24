@@ -43,6 +43,7 @@ namespace DSM.DBModels
         public virtual DbSet<HelpContentMaster> HelpContentMaster { get; set; }
         public virtual DbSet<LineNumberMaster> LineNumberMaster { get; set; }
         public virtual DbSet<QrCode> QrCode { get; set; }
+        public virtual DbSet<ReAssignedcheckListJobResourcesOperator> ReAssignedcheckListJobResourcesOperator { get; set; }
         public virtual DbSet<RejectedJobHistory> RejectedJobHistory { get; set; }
         public virtual DbSet<RoleMaster> RoleMaster { get; set; }
         public virtual DbSet<ShiftMaster> ShiftMaster { get; set; }
@@ -54,13 +55,13 @@ namespace DSM.DBModels
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-               
-               // optionsBuilder.UseSqlServer("Server=DESKTOP-77NC6JC;Database=DSM;user id=sa;password=srks4$;");
               
-               // optionsBuilder.UseSqlServer("Server=DESKTOP-N18DDM0\\SQLEXPRESS;Database=DSM;user id=sa;password=srks4$;");
+               // optionsBuilder.UseSqlServer("Server=TCP:54.224.28.104,1433;Database=DSM_Local;user id=sa;password=srks4$;");
+               
+                optionsBuilder.UseSqlServer("Server=TCP:34.236.191.1,1433;Database=DSM;user id=sa;password=srks4$;");
 
 
-                optionsBuilder.UseSqlServer("Server=TCP:13.233.129.21,8090;Database=DSM;user id=sa;password=srks4$;");
+
             }
         }
 
@@ -637,6 +638,10 @@ namespace DSM.DBModels
                     .HasColumnName("activityStartTime")
                     .HasColumnType("datetime");
 
+                entity.Property(e => e.checkListJobGroupId).HasColumnName("checkListJobGroupId");
+
+                entity.Property(e => e.checkListJobId).HasColumnName("checkListJobId");
+
                 entity.Property(e => e.CheckListJobLototoid).HasColumnName("checkListJobLOTOTOId");
 
                 entity.Property(e => e.CheckListJobOperatorId).HasColumnName("checkListJobOperatorId");
@@ -654,6 +659,8 @@ namespace DSM.DBModels
                 entity.Property(e => e.IsAdminApproved)
                     .HasColumnName("isAdminApproved")
                     .HasDefaultValueSql("((0))");
+
+                entity.Property(e => e.isAdminDoneLototo).HasColumnName("isAdminDoneLototo");
 
                 entity.Property(e => e.IsDeleted)
                     .HasColumnName("isDeleted")
@@ -1022,6 +1029,8 @@ namespace DSM.DBModels
                 entity.Property(e => e.CreatedOn)
                     .HasColumnName("createdOn")
                     .HasColumnType("datetime");
+
+                entity.Property(e => e.EstimatedEndTime).HasColumnName("estimatedEndTime");
 
                 entity.Property(e => e.IsActive)
                     .HasColumnName("isActive")
@@ -1450,6 +1459,52 @@ namespace DSM.DBModels
                 entity.Property(e => e.QrCodeTextPattern)
                     .HasColumnName("qrCodeTextPattern")
                     .HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<ReAssignedcheckListJobResourcesOperator>(entity =>
+            {
+                entity.HasKey(e => e.ReAssignedResourceId)
+                    .HasName("PK_checkListJobReAssignedResource");
+
+                entity.Property(e => e.ReAssignedResourceId).HasColumnName("reAssignedResourceId");
+
+                entity.Property(e => e.CheckListJobGroupId).HasColumnName("checkListJobGroupId");
+
+                entity.Property(e => e.CheckListJobMasterId).HasColumnName("checkListJobMasterId");
+
+                entity.Property(e => e.ChecklistJobFirstOperatorIds)
+                    .HasColumnName("checklistJobFirstOperatorIds")
+                    .HasMaxLength(1000);
+
+                entity.Property(e => e.CreatedBy).HasColumnName("createdBy");
+
+                entity.Property(e => e.CreatedOn)
+                    .HasColumnName("createdOn")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.IsActive).HasColumnName("isActive");
+
+                entity.Property(e => e.IsDeleted).HasColumnName("isDeleted");
+
+                entity.Property(e => e.IsReassigned).HasColumnName("isReassigned");
+
+                entity.Property(e => e.ModifiedBy).HasColumnName("modifiedBy");
+
+                entity.Property(e => e.ModifiedOn)
+                    .HasColumnName("modifiedOn")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.PrimaryResource)
+                    .HasColumnName("primaryResource")
+                    .HasMaxLength(1000);
+
+                entity.Property(e => e.PrimaryResourceToAllFlag).HasColumnName("primaryResourceToAllFlag");
+
+                entity.Property(e => e.SecondaryResource)
+                    .HasColumnName("secondaryResource")
+                    .HasMaxLength(1000);
+
+                entity.Property(e => e.SecondaryResourceToAllFlag).HasColumnName("secondaryResourceToAllFlag");
             });
 
             modelBuilder.Entity<RejectedJobHistory>(entity =>

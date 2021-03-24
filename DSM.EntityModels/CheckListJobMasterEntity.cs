@@ -114,6 +114,10 @@ namespace DSM.EntityModels
             public string batchNumber { get; set; }
             public string processOrderNumber { get; set; }
             public long? estimatedTime { get; set; }
+
+            public bool? isAllGroupsCompletedByOperator { get; set; }
+
+
         }
 
         public class Flag

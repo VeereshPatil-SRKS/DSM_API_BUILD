@@ -33,5 +33,15 @@ namespace DSM.EntityModels
             public string actualL2 { get; set; }
             public string actualAverage { get; set; }
         }
+
+        public class COReport
+        {
+            public string fromDate { get; set; }
+            public string toDate { get; set; }
+            public long? lineNo { get; set; }
+
+        }
+
+
     }
 }

@@ -19,9 +19,6 @@ namespace DSM.DBModels
         public DateTime? ModifiedOn { get; set; }
         public long? ModifiedBy { get; set; }
         public string CheckListGroup { get; set; }
-        //Mani
         public long? EstimatedEndTime { get; set; }
-
-        //Mani
     }
 }

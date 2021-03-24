@@ -16,5 +16,11 @@ namespace DSM.Interface
         CommonResponse DeleteCheckListJobAssignedResource(int checkListJobAssignedResourceId, long userId = 0);
         CommonResponse ArchiveCheckListJobAssignedResource(int checkListJobAssignedResourceId, long userId = 0);
         CommonResponse CheckCheckListJobAssignedResource(int checkListJobAssignedResourceId);
+
+
+        CommonResponse AddAndEditReAssignedCheckListJobResources(CheckListJobAssignedResourceMasterCustom data, long userId = 0);
+
+
+
     }
 }

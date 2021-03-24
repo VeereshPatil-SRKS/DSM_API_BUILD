@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using static DSM.EntityModels.CommonEntity;
+using static DSM.EntityModels.ReportsEntity;
 
 namespace DSM.Controllers
 {
@@ -393,6 +394,135 @@ namespace DSM.Controllers
 
             return Ok(response);
         }
+
+
+
+        //veeresh code 03/03/2021
+        // Switch to Andon dispaly Button -- 4 graphs  (1 year , 1 month , L1 1Month, L2 1Month)
+
+        // graph for 1 year data
+
+        [HttpGet]
+        [Route("Reports/BarChartAllCheckListJObForYear")]
+        public async Task<IActionResult> BarChartAllCheckListJObForYear()
+        {
+            #region Authorization code
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            string id = "";
+            string role = "";
+            if (identity != null)
+
+            {
+                IEnumerable<Claim> claims = identity.Claims;
+                // or
+                id = identity.Claims.Where(m => m.Type == ClaimTypes.Sid).Select(m => m.Value).FirstOrDefault();
+                role = identity.Claims.Where(m => m.Type == ClaimTypes.Role).Select(m => m.Value).FirstOrDefault();
+            }
+            long userId = Convert.ToInt32(id);
+            #endregion
+            //calling CheckListJobOperatorDAL busines layer
+            CommonResponse response = reports.BarChartAllCheckListJObForYear();
+
+            return Ok(response);
+        }
+
+
+        // graph for 1 month data
+        [HttpGet]
+        [Route("Reports/BarChartAllCheckListJObForMonth")]
+        public async Task<IActionResult> BarChartAllCheckListJObForMonth()
+        {
+            #region Authorization code
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            string id = "";
+            string role = "";
+            if (identity != null)
+
+            {
+                IEnumerable<Claim> claims = identity.Claims;
+                // or
+                id = identity.Claims.Where(m => m.Type == ClaimTypes.Sid).Select(m => m.Value).FirstOrDefault();
+                role = identity.Claims.Where(m => m.Type == ClaimTypes.Role).Select(m => m.Value).FirstOrDefault();
+            }
+            long userId = Convert.ToInt32(id);
+            #endregion
+            //calling CheckListJobOperatorDAL busines layer
+            CommonResponseTable response = reports.BarChartAllCheckListJObForMonth();
+
+            return Ok(response);
+        }
+
+
+        // graph for 1 month data for Line-1
+        [HttpGet]
+        [Route("Reports/BarChartAllCheckListJObForMonthLine1")]
+        public async Task<IActionResult> BarChartAllCheckListJObForMonthLine1()
+        {
+            #region Authorization code
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            string id = "";
+            string role = "";
+            if (identity != null)
+
+            {
+                IEnumerable<Claim> claims = identity.Claims;
+                // or
+                id = identity.Claims.Where(m => m.Type == ClaimTypes.Sid).Select(m => m.Value).FirstOrDefault();
+                role = identity.Claims.Where(m => m.Type == ClaimTypes.Role).Select(m => m.Value).FirstOrDefault();
+            }
+            long userId = Convert.ToInt32(id);
+            #endregion
+            //calling CheckListJobOperatorDAL busines layer
+            CommonResponse response = reports.BarChartAllCheckListJObForMonthLine1();
+
+            return Ok(response);
+        }
+
+
+        // graph for 1 month data for Line-2
+        [HttpGet]
+        [Route("Reports/BarChartAllCheckListJObForMonthLine2")]
+        public async Task<IActionResult> BarChartAllCheckListJObForMonthLine2()
+        {
+            #region Authorization code
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            string id = "";
+            string role = "";
+            if (identity != null)
+
+            {
+                IEnumerable<Claim> claims = identity.Claims;
+                // or
+                id = identity.Claims.Where(m => m.Type == ClaimTypes.Sid).Select(m => m.Value).FirstOrDefault();
+                role = identity.Claims.Where(m => m.Type == ClaimTypes.Role).Select(m => m.Value).FirstOrDefault();
+            }
+            long userId = Convert.ToInt32(id);
+            #endregion
+            //calling CheckListJobOperatorDAL busines layer
+            CommonResponse response = reports.BarChartAllCheckListJObForMonthLine2();
+
+            return Ok(response);
+        }
+
+
         #endregion
+
+
+        #region  change over report
+        [HttpPost]
+        [Route("Reports/ChangeOverTimeReport")]
+
+        public async Task<IActionResult> ChangeOverTimeReport(COReport data)
+
+        {
+            CommonResponse response = new CommonResponse();
+
+            response = reports.ChangeOverTimeReport(data);
+            return Ok(response);
+        }
+
+        #endregion
+
+
     }
 }

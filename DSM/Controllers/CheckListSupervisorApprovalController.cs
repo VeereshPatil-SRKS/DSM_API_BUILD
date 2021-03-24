@@ -386,5 +386,76 @@ namespace DSM.Controllers
 
             return Ok(response);
         }
+
+
+
+
+        //veeresh code remaining job reasign  
+
+        /// <summary>
+        /// ramaining job groups
+        /// </summary>
+        /// <param name="checkListJobId"></param>
+        /// <param name="superVisorId"></param>
+        /// <returns></returns>
+       // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "1,2")]
+        [HttpGet]
+        [Route("CheckListSupervisorApproval/ViewRemainingOperatorjobGroupsList")]
+        public async Task<IActionResult> ViewRemainingOperatorjobGroupsList(int checkListJobId)
+        {
+            #region Authorization code
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            string id = "";
+            string role = "";
+            if (identity != null)
+            {
+                IEnumerable<Claim> claims = identity.Claims;
+                // or
+                id = identity.Claims.Where(m => m.Type == ClaimTypes.Sid).Select(m => m.Value).FirstOrDefault();
+                role = identity.Claims.Where(m => m.Type == ClaimTypes.Role).Select(m => m.Value).FirstOrDefault();
+            }
+            long userId = Convert.ToInt32(id);
+            #endregion
+            //calling CheckListJobOperatorDAL busines layer
+            CommonResponse response = checkListSupervisorApproval.ViewRemainingOperatorjobGroupsList(checkListJobId, userId);
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// group wise remaining operator Job
+        /// </summary>
+        
+        
+      //  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "1,2")]
+        [HttpGet]
+        [Route("CheckListSupervisorApproval/ViewRemainingOperatorCheckListJobs")]
+        public async Task<IActionResult> ViewRemainingOperatorCheckListJobs(int checkListJobId,int checkListJobGroupId)
+        {
+            #region Authorization code
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            string id = "";
+            string role = "";
+            if (identity != null)
+            {
+                IEnumerable<Claim> claims = identity.Claims;
+                // or
+                id = identity.Claims.Where(m => m.Type == ClaimTypes.Sid).Select(m => m.Value).FirstOrDefault();
+                role = identity.Claims.Where(m => m.Type == ClaimTypes.Role).Select(m => m.Value).FirstOrDefault();
+            }
+            long userId = Convert.ToInt32(id);
+            #endregion
+            //calling CheckListJobOperatorDAL busines layer
+            CommonResponse response = checkListSupervisorApproval.ViewRemainingOperatorCheckListJobs(checkListJobId, checkListJobGroupId, userId);
+
+            return Ok(response);
+        }
+
+
+
+
+
+
+
     }
 }

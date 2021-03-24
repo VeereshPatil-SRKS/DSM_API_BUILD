@@ -30,7 +30,17 @@ namespace DSM.DAL
             CommonResponse obj = new CommonResponse();
             try
             {
-                var res = db.CheckListJobLototooperator.Where(m => m.CheckListJobOperatorId == data.checkListJobOperatorId && m.CheckListJobLototoid == data.checkListJobLOTOTOId).FirstOrDefault();
+
+
+                var checklWRT = db.CheckListJobWrtoperator.Where(m => m.CheckListJobWrtoperatorId == data.checkListJobOperatorId).FirstOrDefault();
+
+
+
+                var res = db.CheckListJobLototooperator.Where(m => m.checkListJobId == checklWRT.CheckListJobMasterId && m.checkListJobGroupId== checklWRT.CheckListJobGroupId   && m.CheckListJobLototoid == data.checkListJobLOTOTOId).FirstOrDefault();
+
+               
+
+
                 if (res == null)
                 {
                     try
